@@ -270,12 +270,16 @@ func isKnownTaskField(field string) bool {
 	knownFields := map[string]bool{
 		"prompt":          true,
 		"model":           true,
+		"seed":            true,
 		"mode":            true,
 		"image":           true,
 		"images":          true,
 		"size":            true,
 		"duration":        true,
 		"input_reference": true, // Sora 特有字段
+		"first_frame":     true,
+		"last_frame":      true,
+		"audio_duration":  true,
 	}
 	return knownFields[field]
 }

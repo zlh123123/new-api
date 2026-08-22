@@ -868,9 +868,13 @@ type TaskRelayInfo struct {
 type TaskSubmitReq struct {
 	Prompt         string                 `json:"prompt"`
 	Model          string                 `json:"model,omitempty"`
+	Seed           *int                   `json:"seed,omitempty"`
 	Mode           string                 `json:"mode,omitempty"`
 	Image          string                 `json:"image,omitempty"`
 	Images         []string               `json:"images,omitempty"`
+	FirstFrame     string                 `json:"first_frame,omitempty"`
+	LastFrame      string                 `json:"last_frame,omitempty"`
+	AudioDuration  int                    `json:"audio_duration,omitempty"`
 	Size           string                 `json:"size,omitempty"`
 	Duration       int                    `json:"duration,omitempty"`
 	Seconds        string                 `json:"seconds,omitempty"`
