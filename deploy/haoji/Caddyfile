@@ -1,0 +1,19 @@
+{
+    email admin@haoji.blog
+}
+
+haoji.blog {
+    encode gzip zstd
+
+    handle /haoji-logo.svg* {
+        root * /srv
+        rewrite * /haoji-logo.svg
+        file_server
+    }
+
+    reverse_proxy new-api:3000
+}
+
+www.haoji.blog {
+    redir https://haoji.blog{uri} permanent
+}

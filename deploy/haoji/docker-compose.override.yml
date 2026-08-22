@@ -1,0 +1,4 @@
+services:
+  caddy:
+    volumes:
+      - ./public:/srv:ro

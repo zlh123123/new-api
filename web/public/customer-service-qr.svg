@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title>Customer service QR placeholder</title>
+  <rect width="256" height="256" rx="18" fill="#fff"/>
+  <g fill="#0f172a">
+    <path d="M18 18h68v68H18zM30 30v44h44V30zM42 42h20v20H42zM170 18h68v68h-68zM182 30v44h44V30zM194 42h20v20h-20zM18 170h68v68H18zM30 182v44h44v-44zM42 194h20v20H42z"/>
+    <path d="M104 18h18v18h-18zM132 18h18v36h-18zM104 46h18v18h-18zM104 76h46v18h-46zM94 106h18v18H94zM122 102h18v40h-18zM150 106h18v18h-18zM178 102h18v18h-18zM206 100h18v42h-18zM94 134h18v18H94zM150 134h46v18h-46zM104 162h18v18h-18zM132 162h18v46h-18zM160 162h18v18h-18zM188 162h18v18h-18zM216 162h18v18h-18zM104 190h18v18h-18zM160 190h18v18h-18zM188 190h46v18h-46zM104 218h46v18h-46zM160 218h18v18h-18z"/>
+  </g>
+  <text x="128" y="153" fill="#0284c7" font-family="Arial,sans-serif" font-size="9" font-weight="700" text-anchor="middle">客服二维码</text>
+</svg>
