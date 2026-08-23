@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next'
 import { StatusBadge, type StatusVariant } from '@/components/status-badge'
 
 import { isDynamicPricingModel } from '../lib/dynamic-price'
+import { getMiniMaxH3ModelInfo } from '../lib/minimax-h3'
 import { isTokenBasedModel } from '../lib/model-helpers'
 import type { PricingModel } from '../types'
 
@@ -34,7 +35,10 @@ export function ModelBillingModeBadge(props: ModelBillingModeBadgeProps) {
   let label = t('Per Request')
   let variant: StatusVariant = 'purple'
 
-  if (isDynamicPricingModel(props.model)) {
+  if (getMiniMaxH3ModelInfo(props.model.model_name)) {
+    label = t('Per second')
+    variant = 'purple'
+  } else if (isDynamicPricingModel(props.model)) {
     label = t('Dynamic Pricing')
     variant = 'warning'
   } else if (isTokenBasedModel(props.model)) {

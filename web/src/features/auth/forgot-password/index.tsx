@@ -20,9 +20,9 @@ import { Link } from '@tanstack/react-router'
 import { Headphones, LogIn } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { CustomerServiceQRCodes } from '@/components/customer-service-qr-codes'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { customerServiceQRCode } from '@/lib/customer-service'
 
 import { AuthLayout } from '../auth-layout'
 
@@ -55,11 +55,7 @@ export function ForgotPassword() {
                 )}
               </p>
             </div>
-            <img
-              src={customerServiceQRCode}
-              alt={t('Customer service QR code')}
-              className='aspect-square w-56 rounded-2xl border bg-white object-contain p-3'
-            />
+            <CustomerServiceQRCodes />
           </CardContent>
         </Card>
 

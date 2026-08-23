@@ -270,3 +270,34 @@ export function formatRequestPrice(
     abbreviate: false,
   })
 }
+
+/**
+ * Format a usage-based price whose billing starts from ModelPrice and applies
+ * an adaptor-provided usage multiplier (for example, seconds and resolution).
+ */
+export function formatFixedUsagePrice(
+  model: PricingModel,
+  usageMultiplier: number,
+  showWithRecharge = false,
+  priceRate = 1,
+  usdExchangeRate = 1,
+  groupRatio = 1
+): string {
+  if (model.quota_type !== QUOTA_TYPE_VALUES.REQUEST) {
+    return '-'
+  }
+
+  let priceInUSD = (model.model_price || 0) * usageMultiplier * groupRatio
+  priceInUSD = applyRechargeRate(
+    priceInUSD,
+    showWithRecharge,
+    priceRate,
+    usdExchangeRate
+  )
+
+  return formatCurrencyFromUSD(priceInUSD, {
+    digitsLarge: 4,
+    digitsSmall: 4,
+    abbreviate: false,
+  })
+}

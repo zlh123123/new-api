@@ -67,8 +67,18 @@ import {
   isDynamicPricingModel,
 } from '../lib/dynamic-price'
 import { parseTags } from '../lib/filters'
+import {
+  getMiniMaxH3Description,
+  getMiniMaxH3InputDescription,
+  getMiniMaxH3ModelInfo,
+  MINIMAX_H3_BILLING_MULTIPLIER,
+} from '../lib/minimax-h3'
 import { getAvailableGroups, isTokenBasedModel } from '../lib/model-helpers'
-import { formatFixedPrice, formatGroupPrice } from '../lib/price'
+import {
+  formatFixedPrice,
+  formatFixedUsagePrice,
+  formatGroupPrice,
+} from '../lib/price'
 import type {
   ModelCapability,
   PriceType,
@@ -528,7 +538,11 @@ function ModelHeader(props: { model: PricingModel }) {
   const model = props.model
   const modelIconKey = model.icon || model.vendor_icon
   const modelIcon = modelIconKey ? getLobeIcon(modelIconKey, 20) : null
-  const description = model.description || model.vendor_description || null
+  const description =
+    model.description ||
+    getMiniMaxH3Description(t, model.model_name) ||
+    model.vendor_description ||
+    null
 
   return (
     <header className='pb-4'>
@@ -776,6 +790,106 @@ function PriceSection(props: {
           </div>
         </div>
       )}
+    </section>
+  )
+}
+
+function MiniMaxH3PriceSection(props: {
+  model: PricingModel
+  priceRate: number
+  usdExchangeRate: number
+  showRechargePrice: boolean
+}) {
+  const { t } = useTranslation()
+  const info = getMiniMaxH3ModelInfo(props.model.model_name)
+  if (!info) return null
+
+  const prices = [
+    {
+      label: '480p / 768p',
+      multiplier: MINIMAX_H3_BILLING_MULTIPLIER,
+    },
+  ]
+  if (info.supports1080p && info.resolution1080pMultiplier) {
+    prices.push({
+      label: '1080p',
+      multiplier:
+        MINIMAX_H3_BILLING_MULTIPLIER * info.resolution1080pMultiplier,
+    })
+  }
+
+  return (
+    <section>
+      <SectionTitle>{t('Final video price')}</SectionTitle>
+      <div className='overflow-hidden rounded-lg border'>
+        {prices.map((price, index) => (
+          <div
+            key={price.label}
+            className={cn(
+              'flex items-center justify-between gap-4 px-3 py-2.5',
+              index > 0 && 'border-t'
+            )}
+          >
+            <span className='text-muted-foreground text-sm'>{price.label}</span>
+            <span className='font-mono text-sm font-semibold tabular-nums'>
+              {formatFixedUsagePrice(
+                props.model,
+                price.multiplier,
+                props.showRechargePrice,
+                props.priceRate,
+                props.usdExchangeRate
+              )}{' '}
+              / {t('second')}
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className='text-muted-foreground mt-2 text-xs leading-relaxed'>
+        {t(
+          'The final charge is the displayed per-second price multiplied by generated duration and the selected group multiplier. Failed tasks are refunded automatically, and status polling is not charged again.'
+        )}
+      </p>
+    </section>
+  )
+}
+
+function MiniMaxH3ModelSection(props: { model: PricingModel }) {
+  const { t } = useTranslation()
+  const info = getMiniMaxH3ModelInfo(props.model.model_name)
+  if (!info) return null
+
+  const cells = [
+    {
+      label: t('Maximum duration'),
+      value: t('Up to {{seconds}} seconds', { seconds: info.maxDuration }),
+    },
+    {
+      label: t('Supported resolutions'),
+      value: info.resolutions.join('、'),
+    },
+    {
+      label: t('Required inputs'),
+      value: getMiniMaxH3InputDescription(t, info.inputKind),
+    },
+    {
+      label: t('API endpoint'),
+      value: 'POST /v1/videos',
+    },
+  ]
+
+  return (
+    <section>
+      <SectionTitle>{t('Model capabilities')}</SectionTitle>
+      <div className='border-border/60 bg-border/60 grid grid-cols-1 gap-px overflow-hidden rounded-lg border sm:grid-cols-2'>
+        {cells.map((cell) => (
+          <div key={cell.label} className='bg-background px-3 py-2.5'>
+            <div className='text-muted-foreground text-[10px] font-medium tracking-wider uppercase'>
+              {cell.label}
+            </div>
+            <div className='mt-1 text-sm leading-relaxed'>{cell.value}</div>
+          </div>
+        ))}
+      </div>
     </section>
   )
 }
@@ -1144,6 +1258,7 @@ export function ModelDetailsContent(props: ModelDetailsContentProps) {
   const isDynamic =
     props.model.billing_mode === 'tiered_expr' &&
     Boolean(props.model.billing_expr)
+  const isMiniMaxH3 = Boolean(getMiniMaxH3ModelInfo(props.model.model_name))
 
   return (
     <div className='@container/details space-y-4'>
@@ -1171,28 +1286,42 @@ export function ModelDetailsContent(props: ModelDetailsContentProps) {
 
           <section className='bg-card/60 space-y-5 rounded-xl border p-4 shadow-sm'>
             <SectionTitle>{t('Pricing')}</SectionTitle>
-            <PriceSection
-              model={props.model}
-              priceRate={props.priceRate}
-              usdExchangeRate={props.usdExchangeRate}
-              tokenUnit={props.tokenUnit}
-              showRechargePrice={showRechargePrice}
-            />
-            {isDynamic && (
-              <DynamicPricingBreakdown billingExpr={props.model.billing_expr} />
+            {isMiniMaxH3 ? (
+              <MiniMaxH3PriceSection
+                model={props.model}
+                priceRate={props.priceRate}
+                usdExchangeRate={props.usdExchangeRate}
+                showRechargePrice={showRechargePrice}
+              />
+            ) : (
+              <>
+                <PriceSection
+                  model={props.model}
+                  priceRate={props.priceRate}
+                  usdExchangeRate={props.usdExchangeRate}
+                  tokenUnit={props.tokenUnit}
+                  showRechargePrice={showRechargePrice}
+                />
+                {isDynamic && (
+                  <DynamicPricingBreakdown
+                    billingExpr={props.model.billing_expr}
+                  />
+                )}
+                <GroupPricingSection
+                  model={props.model}
+                  groupRatio={props.groupRatio}
+                  usableGroup={props.usableGroup}
+                  autoGroups={props.autoGroups}
+                  priceRate={props.priceRate}
+                  usdExchangeRate={props.usdExchangeRate}
+                  tokenUnit={props.tokenUnit}
+                  showRechargePrice={showRechargePrice}
+                />
+              </>
             )}
-            <GroupPricingSection
-              model={props.model}
-              groupRatio={props.groupRatio}
-              usableGroup={props.usableGroup}
-              autoGroups={props.autoGroups}
-              priceRate={props.priceRate}
-              usdExchangeRate={props.usdExchangeRate}
-              tokenUnit={props.tokenUnit}
-              showRechargePrice={showRechargePrice}
-            />
           </section>
 
+          {isMiniMaxH3 && <MiniMaxH3ModelSection model={props.model} />}
           <ModelBackendDetailsSection model={props.model} />
         </TabsContent>
 

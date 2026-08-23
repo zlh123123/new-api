@@ -30,8 +30,17 @@ import {
   getDynamicPricingSummary,
 } from '../lib/dynamic-price'
 import { parseTags } from '../lib/filters'
-import { isTokenBasedModel } from '../lib/model-helpers'
-import { formatPrice, formatRequestPrice } from '../lib/price'
+import {
+  getMiniMaxH3Description,
+  getMiniMaxH3ModelInfo,
+  MINIMAX_H3_BILLING_MULTIPLIER,
+} from '../lib/minimax-h3'
+import { getDisplayGroupRatio, isTokenBasedModel } from '../lib/model-helpers'
+import {
+  formatFixedUsagePrice,
+  formatPrice,
+  formatRequestPrice,
+} from '../lib/price'
 import type { PricingModel, TokenUnit } from '../types'
 import { ModelBillingModeBadge } from './model-billing-mode-badge'
 import { ModelPerfBadge, type ModelPerfBadgeData } from './model-perf-badge'
@@ -55,6 +64,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   const usdExchangeRate = props.usdExchangeRate ?? 1
   const showRechargePrice = props.showRechargePrice ?? false
   const isTokenBased = isTokenBasedModel(props.model)
+  const miniMaxH3Info = getMiniMaxH3ModelInfo(props.model.model_name)
   const tokenUnitLabel = tokenUnit === 'K' ? '1K' : '1M'
   const tags = parseTags(props.model.tags)
   const groups = props.model.enable_groups || []
@@ -92,7 +102,23 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   }
 
   let priceSummary: ReactNode
-  if (dynamicSummary) {
+  if (miniMaxH3Info) {
+    priceSummary = (
+      <span className='text-muted-foreground whitespace-nowrap'>
+        <span className='text-foreground font-mono font-semibold'>
+          {formatFixedUsagePrice(
+            props.model,
+            MINIMAX_H3_BILLING_MULTIPLIER,
+            showRechargePrice,
+            priceRate,
+            usdExchangeRate,
+            getDisplayGroupRatio(props.model, props.selectedGroup)
+          )}
+        </span>{' '}
+        / {t('second')}
+      </span>
+    )
+  } else if (dynamicSummary) {
     if (dynamicSummary.isSpecialExpression) {
       priceSummary = (
         <span className='min-w-0'>
@@ -242,7 +268,9 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
 
       {/* Description */}
       <p className='text-muted-foreground mt-2 line-clamp-1 flex-1 text-[13px] leading-relaxed sm:mt-4 sm:line-clamp-2 sm:min-h-[2.5rem]'>
-        {props.model.description || t('No description available.')}
+        {props.model.description ||
+          getMiniMaxH3Description(t, props.model.model_name) ||
+          t('No description available.')}
       </p>
 
       {/* Footer: left metadata and right performance summary share row alignment */}
@@ -263,9 +291,11 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
               {item}
             </span>
           ))}
-          <span className='text-muted-foreground/50 text-xs'>
-            {tokenUnitLabel}
-          </span>
+          {isTokenBased && (
+            <span className='text-muted-foreground/50 text-xs'>
+              {tokenUnitLabel}
+            </span>
+          )}
           {hiddenCount > 0 && (
             <span className='text-muted-foreground/40 text-xs'>
               +{hiddenCount}

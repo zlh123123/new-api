@@ -29,10 +29,10 @@ import {
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
+import { CustomerServiceQRCodes } from '@/components/customer-service-qr-codes'
 import { Button } from '@/components/ui/button'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
-import { customerServiceQRCode } from '@/lib/customer-service'
 
 interface HeroProps {
   isAuthenticated?: boolean
@@ -203,12 +203,8 @@ export function Hero(props: HeroProps) {
                 <Headphones className='text-muted-foreground/80 group-hover:text-foreground size-4 transition-colors duration-200' />
                 <span>{t('Contact support')}</span>
               </Button>
-              <div className='pointer-events-none invisible absolute right-0 bottom-full z-20 mb-3 w-52 translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 opacity-0 shadow-xl transition-all duration-200 group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 dark:border-white/10 dark:bg-slate-900'>
-                <img
-                  src={customerServiceQRCode}
-                  alt={t('Contact support')}
-                  className='aspect-square w-full rounded-xl bg-white object-contain p-2'
-                />
+              <div className='pointer-events-none invisible absolute right-0 bottom-full z-20 mb-3 w-[min(90vw,28rem)] translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 opacity-0 shadow-xl transition-all duration-200 group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 dark:border-white/10 dark:bg-slate-900'>
+                <CustomerServiceQRCodes compact />
               </div>
             </div>
           </div>

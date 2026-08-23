@@ -41,6 +41,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useStatus } from '@/hooks/use-status'
 
 import {
+  buildMiniMaxH3VideoBody,
+  getMiniMaxH3ModelInfo,
+} from '../lib/minimax-h3'
+import {
   buildRateLimits,
   buildSupportedParameters,
   formatRateLimit,
@@ -109,7 +113,7 @@ function buildChatSample(lang: Lang, ctx: SampleContext): string {
       `curl ${url} \\`,
       `  -H "Authorization: Bearer $${ctx.apiKeyEnv}" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${bodyJson.replace(/\n/g, '\n     ')}'`,
+      `  -d '${bodyJson.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
 
@@ -177,7 +181,7 @@ function buildAnthropicSample(lang: Lang, ctx: SampleContext): string {
       `  -H "x-api-key: $${ctx.apiKeyEnv}" \\`,
       `  -H "anthropic-version: 2023-06-01" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -249,7 +253,7 @@ function buildGeminiSample(lang: Lang, ctx: SampleContext): string {
     return [
       `curl '${url}' \\`,
       `  -H 'Content-Type: application/json' \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -299,7 +303,7 @@ function buildEmbeddingSample(lang: Lang, ctx: SampleContext): string {
       `curl ${url} \\`,
       `  -H "Authorization: Bearer $${ctx.apiKeyEnv}" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -365,7 +369,7 @@ function buildImageSample(lang: Lang, ctx: SampleContext): string {
       `curl ${url} \\`,
       `  -H "Authorization: Bearer $${ctx.apiKeyEnv}" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -423,6 +427,54 @@ function buildImageSample(lang: Lang, ctx: SampleContext): string {
   ].join('\n')
 }
 
+function buildVideoSample(lang: Lang, ctx: SampleContext): string {
+  const url = `${ctx.baseUrl}${ctx.endpointPath}`
+  const body = buildMiniMaxH3VideoBody(ctx.modelName)
+  const bodyJson = JSON.stringify(body, null, 2)
+
+  if (lang === 'curl') {
+    return [
+      `curl ${url} \\`,
+      `  -H "Authorization: Bearer $${ctx.apiKeyEnv}" \\`,
+      `  -H "Content-Type: application/json" \\`,
+      `  -d '${bodyJson.replaceAll('\n', '\n     ')}'`,
+    ].join('\n')
+  }
+  if (lang === 'python') {
+    return [
+      'import requests',
+      '',
+      `url = "${url}"`,
+      `headers = {"Authorization": "Bearer <YOUR_API_KEY>"}`,
+      `payload = ${bodyJson.replaceAll('\n', '\n')}`,
+      '',
+      'response = requests.post(url, headers=headers, json=payload)',
+      'response.raise_for_status()',
+      'video = response.json()',
+      'print(video["id"])',
+    ].join('\n')
+  }
+
+  const authorizationHeader =
+    lang === 'typescript'
+      ? `    Authorization: \`Bearer \${process.env.${ctx.apiKeyEnv}}\`,`
+      : `    Authorization: 'Bearer <YOUR_API_KEY>',`
+  return [
+    `const response = await fetch('${url}', {`,
+    `  method: 'POST',`,
+    `  headers: {`,
+    authorizationHeader,
+    `    'Content-Type': 'application/json',`,
+    `  },`,
+    `  body: JSON.stringify(${bodyJson}),`,
+    `})`,
+    '',
+    `if (!response.ok) throw new Error(await response.text())`,
+    `const video = await response.json()`,
+    `console.log(video.id)`,
+  ].join('\n')
+}
+
 function buildSample(
   lang: Lang,
   endpointType: string,
@@ -430,9 +482,11 @@ function buildSample(
 ): string {
   if (endpointType === 'anthropic') return buildAnthropicSample(lang, ctx)
   if (endpointType === 'gemini') return buildGeminiSample(lang, ctx)
-  if (endpointType === 'embeddings' || endpointType === 'jina-rerank')
+  if (endpointType === 'embeddings' || endpointType === 'jina-rerank') {
     return buildEmbeddingSample(lang, ctx)
+  }
   if (endpointType === 'image-generation') return buildImageSample(lang, ctx)
+  if (endpointType === 'openai-video') return buildVideoSample(lang, ctx)
   return buildChatSample(lang, ctx)
 }
 
@@ -754,6 +808,47 @@ function AuthSection() {
   )
 }
 
+function VideoWorkflowSection(props: { model: PricingModel }) {
+  const { t } = useTranslation()
+  if (!getMiniMaxH3ModelInfo(props.model.model_name)) return null
+
+  return (
+    <section>
+      <SectionTitle icon={ScrollText}>
+        {t('Asynchronous workflow')}
+      </SectionTitle>
+      <ol className='border-border/60 bg-muted/20 space-y-2 rounded-lg border p-3 text-sm'>
+        <li>
+          1. {t('Create a task with')}{' '}
+          <code className='bg-muted rounded px-1 py-0.5 font-mono text-xs'>
+            POST /v1/videos
+          </code>{' '}
+          {t('and save the returned video ID.')}
+        </li>
+        <li>
+          2. {t('Poll')}{' '}
+          <code className='bg-muted rounded px-1 py-0.5 font-mono text-xs'>
+            GET /v1/videos/{'{video_id}'}
+          </code>{' '}
+          {t('until the status becomes completed.')}
+        </li>
+        <li>
+          3. {t('Read the generated MP4 URL from')}{' '}
+          <code className='bg-muted rounded px-1 py-0.5 font-mono text-xs'>
+            metadata.url
+          </code>
+          .
+        </li>
+      </ol>
+      <p className='text-muted-foreground mt-2 text-xs'>
+        {t(
+          'Reference image and audio URLs must be publicly accessible. Poll the existing task instead of submitting it again.'
+        )}
+      </p>
+    </section>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Composite API tab
 // ---------------------------------------------------------------------------
@@ -765,9 +860,14 @@ export function ModelDetailsApi(props: {
   return (
     <div className='space-y-6'>
       <CodeSamplesSection model={props.model} endpointMap={props.endpointMap} />
+      <VideoWorkflowSection model={props.model} />
       <AuthSection />
-      <SupportedParametersSection model={props.model} />
-      <RateLimitsSection model={props.model} />
+      {!getMiniMaxH3ModelInfo(props.model.model_name) && (
+        <>
+          <SupportedParametersSection model={props.model} />
+          <RateLimitsSection model={props.model} />
+        </>
+      )}
     </div>
   )
 }

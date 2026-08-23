@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export const customerServiceQRCode = new URL(
-  '../../../客服二维码.jpg',
-  import.meta.url
-).href
+export const customerServiceQRCodes = [
+  new URL('../../../客服二维码.jpg', import.meta.url).href,
+  new URL('../../../客服二维码2.jpg', import.meta.url).href,
+] as const
