@@ -164,6 +164,25 @@ export const CHANNEL_TYPE_CONFIGS: Record<number, ChannelTypeConfig> = {
       models: 'Models',
     },
   },
+  61: {
+    id: 61,
+    name: CHANNEL_TYPES[61],
+    icon: 'ComfyUI',
+    defaultBaseUrl: 'https://autodl.art',
+    supportedModels: [
+      'minimax_h3_image_audio_to_video_v2_15s',
+      'minimax_h3_lightx2v_v5_15s',
+      'minimax_h3_image_audio_to_video_v2',
+      'minimax_h3_lightx2v_v5',
+      'minimax_h3_lightx2v_no_pic',
+      'minimax_h3_lightx2v',
+    ],
+    hints: {
+      baseUrl: 'Default: https://autodl.art',
+      key: 'Enter AutoDL API token',
+      models: 'Select one of the supported AutoDL video workflows',
+    },
+  },
 }
 
 /**

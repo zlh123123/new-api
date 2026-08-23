@@ -32,6 +32,7 @@ import { CopyButton } from '@/components/copy-button'
 import { Button } from '@/components/ui/button'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
+import { customerServiceQRCode } from '@/lib/customer-service'
 
 interface HeroProps {
   isAuthenticated?: boolean
@@ -42,8 +43,11 @@ export function Hero(props: HeroProps) {
   const { status } = useStatus()
   const { logo, systemName } = useSystemConfig()
   const brandName = systemName === 'New API' ? 'haoji api' : systemName
+  const configuredDocsUrl = status?.docs_link as string | undefined
   const docsUrl =
-    (status?.docs_link as string | undefined) || 'https://docs.newapi.pro'
+    !configuredDocsUrl || configuredDocsUrl === 'https://docs.newapi.pro'
+      ? '/docs'
+      : configuredDocsUrl
   const serverAddress = status?.server_address as string | undefined
   const isLocalPreview =
     window.location.hostname === 'localhost' ||
@@ -201,7 +205,7 @@ export function Hero(props: HeroProps) {
               </Button>
               <div className='pointer-events-none invisible absolute right-0 bottom-full z-20 mb-3 w-52 translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 opacity-0 shadow-xl transition-all duration-200 group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 dark:border-white/10 dark:bg-slate-900'>
                 <img
-                  src='/customer-service-qr.svg'
+                  src={customerServiceQRCode}
                   alt={t('Contact support')}
                   className='aspect-square w-full rounded-xl bg-white object-contain p-2'
                 />

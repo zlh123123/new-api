@@ -103,6 +103,10 @@ export const STATIC_I18N_KEYS = [
   'Successfully created {{count}} API Key(s)',
   'Successfully deleted {{count}} API key(s)',
   'Enter API key for this channel',
+  'AutoDL Video Generation',
+  'Enter AutoDL API token',
+  'Default: https://autodl.art',
+  'Select one of the supported AutoDL video workflows',
 
   // Users
   'Root',

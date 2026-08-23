@@ -17,10 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
+import { Headphones, LogIn } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { customerServiceQRCode } from '@/lib/customer-service'
+
 import { AuthLayout } from '../auth-layout'
-import { ForgotPasswordForm } from './components/forgot-password-form'
 
 export function ForgotPassword() {
   const { t } = useTranslation()
@@ -33,22 +37,39 @@ export function ForgotPassword() {
           </h2>
           <p className='text-muted-foreground text-left text-sm sm:text-base'>
             {t(
-              'Enter your registered email and we will send you a link to reset your password.'
+              'Password recovery is handled by customer service. Scan the QR code below and contact us to reset your password.'
             )}
-          </p>
-          <p className='text-muted-foreground text-left text-sm sm:text-base'>
-            {t("Don't have an account?")}{' '}
-            <Link
-              to='/sign-up'
-              className='hover:text-primary font-medium underline underline-offset-4'
-            >
-              {t('Sign up')}
-            </Link>
-            .
           </p>
         </div>
 
-        <ForgotPasswordForm className='space-y-0' />
+        <Card>
+          <CardContent className='flex flex-col items-center gap-5 pt-6 text-center'>
+            <div className='bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full'>
+              <Headphones className='size-6' />
+            </div>
+            <div className='space-y-1'>
+              <p className='font-semibold'>{t('Contact customer service')}</p>
+              <p className='text-muted-foreground text-sm'>
+                {t(
+                  'Tell customer service your username. Do not share your API key or current password.'
+                )}
+              </p>
+            </div>
+            <img
+              src={customerServiceQRCode}
+              alt={t('Customer service QR code')}
+              className='aspect-square w-56 rounded-2xl border bg-white object-contain p-3'
+            />
+          </CardContent>
+        </Card>
+
+        <Button
+          variant='outline'
+          className='w-full'
+          render={<Link to='/sign-in' />}
+        >
+          <LogIn className='size-4' /> {t('Back to sign in')}
+        </Button>
       </div>
     </AuthLayout>
   )

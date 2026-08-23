@@ -56,7 +56,11 @@ export function useTopNavLinks(): TopNavLink[] {
   }, [status])
 
   // Documentation link (may be external)
-  const docsLink: string | undefined = status?.docs_link as string | undefined
+  const configuredDocsLink = status?.docs_link as string | undefined
+  const docsLink =
+    configuredDocsLink === 'https://docs.newapi.pro'
+      ? undefined
+      : configuredDocsLink
 
   const isAuthed = !!auth?.user
 
