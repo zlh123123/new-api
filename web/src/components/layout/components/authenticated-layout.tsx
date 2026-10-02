@@ -23,6 +23,11 @@ import { LayoutProvider } from '@/context/layout-provider'
 import { SearchProvider } from '@/context/search-provider'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth-store'
+import { listSupportNotifications, markSupportNotificationRead } from '@/lib/api'
+import { toast } from 'sonner'
+import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { AppHeader } from './app-header'
 import { AppSidebar } from './app-sidebar'
@@ -33,6 +38,28 @@ type AuthenticatedLayoutProps = {
 
 export function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
   const defaultOpen = getCookie('sidebar_state') !== 'false'
+  const { t } = useTranslation()
+  const user = useAuthStore((state) => state.auth.user)
+  const seen = useRef(new Set<number>())
+  useEffect(() => {
+    if (!user) return
+    let active = true
+    const poll = async () => {
+      try {
+        const result = await listSupportNotifications(true)
+        if (!active) return
+        for (const item of result.items ?? []) {
+          if (!seen.current.has(item.id)) {
+            seen.current.add(item.id)
+            toast.info(item.title, { description: item.content, action: { label: t('View'), onClick: () => { window.location.href = `/support` } } })
+            void markSupportNotificationRead(item.id)
+          }
+        }
+      } catch { /* notification polling is best effort */ }
+    }
+    void poll(); const timer = window.setInterval(poll, 30000)
+    return () => { active = false; window.clearInterval(timer) }
+  }, [user, t])
 
   return (
     <LayoutProvider>

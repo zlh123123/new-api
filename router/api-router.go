@@ -65,6 +65,20 @@ func SetApiRouter(router *gin.Engine) {
 		// Universal secure verification routes
 		apiRouter.POST("/verify", middleware.UserAuth(), middleware.CriticalRateLimit(), middleware.DisableCache(), controller.UniversalVerify)
 
+		supportRoute := apiRouter.Group("/support")
+		supportRoute.Use(middleware.UserAuth())
+		{
+			supportRoute.GET("/tickets", controller.ListSupportTickets)
+			supportRoute.POST("/tickets", middleware.CriticalRateLimit(), controller.CreateSupportTicket)
+			supportRoute.GET("/tickets/:id", controller.GetSupportTicket)
+			supportRoute.POST("/tickets/:id/messages", middleware.CriticalRateLimit(), controller.ReplySupportTicket)
+			supportRoute.PUT("/tickets/:id/status", controller.UpdateSupportTicketStatus)
+			supportRoute.GET("/attachments/:id", controller.ServeSupportAttachment)
+			supportRoute.GET("/notifications", controller.ListSupportNotifications)
+			supportRoute.POST("/notifications/:id/read", controller.ReadSupportNotification)
+			supportRoute.POST("/notifications/read-all", controller.ReadAllSupportNotifications)
+		}
+
 		userRoute := apiRouter.Group("/user")
 		{
 			userRoute.POST("/auth/refresh", middleware.SessionCookieOriginGuard(), middleware.CriticalRateLimit(), middleware.DisableCache(), controller.RefreshAuth)

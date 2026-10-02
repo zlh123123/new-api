@@ -29,15 +29,25 @@ export function Logo({ className, ...props }: SVGProps<SVGSVGElement>) {
       height='24'
       width='24'
       fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
+      stroke='url(#newapi-logo-gradient)'
+      strokeWidth='2.4'
       strokeLinecap='round'
       strokeLinejoin='round'
       className={cn('size-6', className)}
       {...props}
     >
       <title>New API</title>
-      <path d='M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3' />
+      <defs>
+        <linearGradient id='newapi-logo-gradient' x1='4' y1='4' x2='20' y2='20'>
+          <stop stopColor='#22d3ee' />
+          <stop offset='1' stopColor='#8b5cf6' />
+        </linearGradient>
+      </defs>
+      <path d='M5 18V6l14 12V6' />
+      <circle cx='5' cy='6' r='1.15' fill='#ecfeff' stroke='none' />
+      <circle cx='5' cy='18' r='1.15' fill='#c4b5fd' stroke='none' />
+      <circle cx='19' cy='6' r='1.15' fill='#ecfeff' stroke='none' />
+      <circle cx='19' cy='18' r='1.15' fill='#c4b5fd' stroke='none' />
     </svg>
   )
 }

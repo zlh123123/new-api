@@ -36,8 +36,9 @@ import {
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { type SidebarData } from '@/components/layout/types'
+import type { SidebarData } from '@/components/layout/types'
 import { ROLE } from '@/lib/roles'
+import { useAuthStore } from '@/stores/auth-store'
 
 /**
  * Root navigation groups for the application sidebar.
@@ -47,6 +48,8 @@ import { ROLE } from '@/lib/roles'
  */
 export function useSidebarData(): SidebarData {
   const { t } = useTranslation()
+  const user = useAuthStore((state) => state.auth.user)
+  const isAdmin = (user?.role ?? ROLE.GUEST) >= ROLE.ADMIN
 
   return {
     navGroups: [
@@ -108,6 +111,15 @@ export function useSidebarData(): SidebarData {
             url: '/wallet',
             icon: Wallet,
           },
+          ...(isAdmin
+            ? []
+            : [
+                {
+                  title: t('Support'),
+                  url: '/support',
+                  icon: MessageSquare,
+                },
+              ]),
           {
             title: t('Profile'),
             url: '/profile',
@@ -133,6 +145,12 @@ export function useSidebarData(): SidebarData {
             title: t('Users'),
             url: '/users',
             icon: Users,
+          },
+          {
+            title: t('Support tickets'),
+            url: '/support',
+            icon: Ticket,
+            requiredRole: ROLE.ADMIN,
           },
           {
             title: t('Redemption Codes'),

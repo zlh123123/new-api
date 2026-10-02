@@ -121,3 +121,30 @@ export async function regenerate2FABackupCodes(code: string) {
   )
   return res.data
 }
+
+// Support ticket APIs
+export async function listSupportTickets() {
+  const res = await api.get('/api/support/tickets')
+  return res.data?.data ?? []
+}
+export async function getSupportTicket(id: number) {
+  const res = await api.get(`/api/support/tickets/${id}`)
+  return res.data?.data
+}
+export async function createSupportTicket(input: { subject: string; category?: string; content: string; files?: File[] }) {
+  const form = new FormData(); form.append('subject', input.subject); form.append('category', input.category ?? ''); form.append('content', input.content)
+  input.files?.forEach((file) => form.append('files', file))
+  const res = await api.post('/api/support/tickets', form); return res.data?.data
+}
+export async function replySupportTicket(id: number, content: string, files?: File[]) {
+  const form = new FormData(); form.append('content', content); files?.forEach((file) => form.append('files', file))
+  const res = await api.post(`/api/support/tickets/${id}/messages`, form); return res.data?.data
+}
+export async function updateSupportTicketStatus(id: number, status: 'open' | 'closed') {
+  const res = await api.put(`/api/support/tickets/${id}/status`, { status }); return res.data?.data
+}
+export async function listSupportNotifications(unreadOnly = false) {
+  const res = await api.get('/api/support/notifications', { params: { unread_only: unreadOnly } }); return res.data?.data ?? { items: [], unread_count: 0 }
+}
+export async function markSupportNotificationRead(id: number) { await api.post(`/api/support/notifications/${id}/read`) }
+export async function markAllSupportNotificationsRead() { await api.post('/api/support/notifications/read-all') }

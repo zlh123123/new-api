@@ -142,6 +142,7 @@ export function RechargeFormCard({
     Array.isArray(waffoPayMethods) && waffoPayMethods.length > 0
   const minTopup = getMinTopupAmount(topupInfo)
   const redemptionEnabled = topupInfo?.enable_redemption !== false
+  const cardOnlyMode = !hasAnyTopup && Boolean(topupLink)
 
   if (loading) {
     return (
@@ -196,8 +197,12 @@ export function RechargeFormCard({
 
   return (
     <TitledCard
-      title={t('Add Funds')}
-      description={t('Choose an amount and payment method')}
+      title={cardOnlyMode ? t('Recharge with a card') : t('Add Funds')}
+      description={
+        cardOnlyMode
+          ? t('Buy a prepaid card, then redeem its code here.')
+          : t('Choose an amount and payment method')
+      }
       icon={<WalletCards className='h-4 w-4' />}
       iconTone='success'
       disableHoverEffect
@@ -217,7 +222,7 @@ export function RechargeFormCard({
       contentClassName='space-y-4 sm:space-y-6'
     >
       {/* Online Topup Section */}
-      {hasAnyTopup ? (
+      {hasAnyTopup && (
         <div className='space-y-4 sm:space-y-6'>
           {hasConfigurableTopup && (
             <>
@@ -477,7 +482,27 @@ export function RechargeFormCard({
             </>
           )}
         </div>
-      ) : (
+      )}
+      {!hasAnyTopup && cardOnlyMode && (
+        <div className='border-primary/20 bg-primary/5 flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between'>
+          <div className='space-y-1'>
+            <p className='font-medium'>{t('Buy a recharge card')}</p>
+            <p className='text-muted-foreground text-sm'>
+              {t('Complete payment in the store and return here with your card code.')}
+            </p>
+          </div>
+          <Button
+            className='shrink-0 gap-2'
+            render={
+              <a href={topupLink} target='_blank' rel='noopener noreferrer' />
+            }
+          >
+            {t('Buy a card')}
+            <ExternalLink className='h-4 w-4' />
+          </Button>
+        </div>
+      )}
+      {!hasAnyTopup && !cardOnlyMode && (
         <Alert>
           <AlertDescription>
             {t(
@@ -514,9 +539,14 @@ export function RechargeFormCard({
               htmlFor='redemption-code'
               className='text-muted-foreground text-xs font-medium tracking-wider uppercase'
             >
-              {t('Have a Code?')}
+              {cardOnlyMode ? t('Redeem a recharge card') : t('Have a Code?')}
             </Label>
           </div>
+          {cardOnlyMode && (
+            <p className='text-muted-foreground text-xs'>
+              {t('Buy a card first, then paste the code here.')}
+            </p>
+          )}
           <div className='grid grid-cols-[minmax(0,1fr)_auto] gap-2'>
             <Input
               id='redemption-code'
