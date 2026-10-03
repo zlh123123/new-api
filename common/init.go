@@ -100,6 +100,9 @@ func InitEnv() {
 	}
 	SMTPStartTLSEnabled = GetEnvOrDefaultBool("SMTP_STARTTLS_ENABLE", GetEnvOrDefaultBool("SMTP_STARTTLS_ENABLED", false))
 	SMTPInsecureSkipVerify = GetEnvOrDefaultBool("SMTP_INSECURE_SKIP_VERIFY", GetEnvOrDefaultBool("SMTP_TLS_INSECURE_SKIP_VERIFY", false))
+	ResendAPIKey = os.Getenv("RESEND_API_KEY")
+	ResendFrom = os.Getenv("RESEND_FROM")
+	ResendAPIURL = GetEnvOrDefaultString("RESEND_API_URL", "https://api.resend.com/emails")
 
 	// Parse requestInterval and set RequestInterval
 	requestInterval, _ = strconv.Atoi(os.Getenv("POLLING_INTERVAL"))

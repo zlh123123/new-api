@@ -105,6 +105,11 @@ var SMTPAccount = ""
 var SMTPFrom = ""
 var SMTPToken = ""
 
+// Resend settings. When RESEND_API_KEY is configured, email delivery uses the Resend HTTP API before falling back to SMTP.
+var ResendAPIKey = ""
+var ResendFrom = ""
+var ResendAPIURL = "https://api.resend.com/emails"
+
 var GitHubClientId = ""
 var GitHubClientSecret = ""
 var LinuxDOClientId = ""

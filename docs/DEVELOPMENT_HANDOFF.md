@@ -84,4 +84,17 @@ The repository has unrelated pre-existing lint findings outside this change; a f
 1. Add an administrator ticket detail view with user identity, category filters, status filters, and pagination if the number of tickets grows.
 2. Add an unread-count badge to the sidebar or notification popover; the current implementation already exposes `unread_count` from the notification API.
 3. Add end-to-end tests for creating a ticket, uploading an image, administrator reply, permission isolation, notification delivery, and email delivery.
-4. Before production deployment, configure `SESSION_COOKIE_SECURE=true`, a trusted proxy list, HTTPS, a persistent `/data` volume, and a transactional SMTP provider if email verification is enabled. For Brevo SMTP, use `smtp-relay.brevo.com`, port `587`, disable implicit SSL, enable STARTTLS, set the account to the Brevo SMTP login, set the From address to an address on a verified domain, and use a Brevo SMTP key as the token. Never commit these credentials.
+4. Before production deployment, configure `SESSION_COOKIE_SECURE=true`, a trusted proxy list, HTTPS, a persistent `/data` volume, and the Resend environment variables described below. SMTP remains a fallback and must never have credentials committed.
+
+## Resend email delivery
+
+The application now prefers the Resend HTTP API whenever `RESEND_API_KEY` is set. All existing email flows use the same `common.SendEmail` entry point, so registration verification, password reset, support-ticket notifications, and other system emails are covered. SMTP remains available as a fallback when the Resend key is absent.
+
+For Docker, set these environment variables on the API container:
+
+```text
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxx
+RESEND_FROM=Haoji API <no-reply@haojiapi.me>
+```
+
+`RESEND_FROM` must use an address on a domain verified in Resend. The API endpoint defaults to `https://api.resend.com/emails`; `RESEND_API_URL` is only intended for tests or a compatible proxy. Keep the API key in the deployment secret store and never commit it to Git.

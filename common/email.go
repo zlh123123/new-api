@@ -76,6 +76,9 @@ func newSMTPClient(addr string) (*smtp.Client, error) {
 }
 
 func SendEmail(subject string, receiver string, content string) error {
+	if strings.TrimSpace(ResendAPIKey) != "" {
+		return sendEmailWithResend(subject, receiver, content)
+	}
 	if SMTPFrom == "" { // for compatibility
 		SMTPFrom = SMTPAccount
 	}
