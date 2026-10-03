@@ -13,6 +13,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -107,6 +108,7 @@ func CreateSupportTicket(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
+	service.NotifySupportTicketCreated(ticket.Id)
 	common.ApiSuccess(c, ticket)
 }
 
@@ -169,6 +171,9 @@ func ReplySupportTicket(c *gin.Context) {
 	if err := model.AddSupportTicketMessage(ticket, message, attachments, admin); err != nil {
 		common.ApiError(c, err)
 		return
+	}
+	if admin {
+		service.NotifySupportTicketReply(ticket.Id)
 	}
 	common.ApiSuccess(c, message)
 }

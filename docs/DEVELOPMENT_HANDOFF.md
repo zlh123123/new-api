@@ -37,7 +37,7 @@ Routes are registered in `router/api-router.go` under `/api/support`:
 
 Attachments are validated as JPEG, PNG, GIF, or WebP, with at most five files per message and a 5 MB limit per file. Files are stored under `data/support-attachments` by default. Set `SUPPORT_UPLOAD_DIR` to override this path. Docker deployments should persist `/data` so uploaded files survive container recreation.
 
-When a user creates a ticket, enabled administrators receive notifications. When an administrator replies, the ticket owner receives a notification. The authenticated layout polls unread notifications every 30 seconds and shows an in-app toast; the current implementation does not send email, Telegram, or external push notifications.
+When a user creates a ticket, enabled administrators receive in-app notifications and an email when they have a non-empty email address. When an administrator replies, the ticket owner receives an in-app notification and an email when the account has a non-empty email address. The authenticated layout polls unread notifications every 30 seconds and shows an in-app toast. Email delivery runs asynchronously, so an SMTP outage is logged and does not block ticket creation or replies.
 
 The frontend page is `web/src/features/support/support-page.tsx`, routed at `/support`. Administrators see only the `Admin > 工单管理` navigation entry; ordinary users see only `Personal > 客服工单`. The backend remains the source of truth for the administrator permission check.
 
@@ -83,6 +83,5 @@ The repository has unrelated pre-existing lint findings outside this change; a f
 
 1. Add an administrator ticket detail view with user identity, category filters, status filters, and pagination if the number of tickets grows.
 2. Add an unread-count badge to the sidebar or notification popover; the current implementation already exposes `unread_count` from the notification API.
-3. Add email or Feishu/Telegram notification delivery if administrators need alerts while offline.
-4. Add end-to-end tests for creating a ticket, uploading an image, administrator reply, permission isolation, and notification delivery.
-5. Before production deployment, configure `SESSION_COOKIE_SECURE=true`, a trusted proxy list, HTTPS, a persistent `/data` volume, and a transactional SMTP provider if email verification is enabled.
+3. Add end-to-end tests for creating a ticket, uploading an image, administrator reply, permission isolation, notification delivery, and email delivery.
+4. Before production deployment, configure `SESSION_COOKIE_SECURE=true`, a trusted proxy list, HTTPS, a persistent `/data` volume, and a transactional SMTP provider if email verification is enabled. For Brevo SMTP, use `smtp-relay.brevo.com`, port `587`, disable implicit SSL, enable STARTTLS, set the account to the Brevo SMTP login, set the From address to an address on a verified domain, and use a Brevo SMTP key as the token. Never commit these credentials.
