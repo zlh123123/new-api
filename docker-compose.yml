@@ -38,6 +38,8 @@ services:
       - NODE_NAME=new-api-node-1
       - SESSION_SECRET=${SESSION_SECRET}
       - CRYPTO_SECRET=${CRYPTO_SECRET}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - "RESEND_FROM=${RESEND_FROM}"
       - SESSION_COOKIE_SECURE=true
       - SESSION_COOKIE_TRUSTED_URL=https://haoji.blog
       - TRUSTED_PROXIES=172.20.0.0/16
