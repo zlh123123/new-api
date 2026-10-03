@@ -62,7 +62,7 @@ services:
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: new-api
     volumes:
-      - dev_pg_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
     networks:
       - dev-network
     healthcheck:
@@ -73,7 +73,7 @@ services:
 
 volumes:
   dev_data:
-  dev_pg_data:
+  pg_data:
 
 networks:
   dev-network:
