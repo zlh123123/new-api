@@ -51,7 +51,15 @@ export function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
         for (const item of result.items ?? []) {
           if (!seen.current.has(item.id)) {
             seen.current.add(item.id)
-            toast.info(item.title, { description: item.content, action: { label: t('View'), onClick: () => { window.location.href = `/support` } } })
+            const titleKey =
+              item.type === 'ticket_reply'
+                ? 'Support replied'
+                : item.type === 'ticket_created'
+                  ? 'New support ticket'
+                  : item.type === 'ticket_message'
+                    ? 'Support ticket updated'
+                    : item.title
+            toast.info(t(titleKey), { description: item.content, action: { label: t('View'), onClick: () => { window.location.href = `/support` } } })
             void markSupportNotificationRead(item.id)
           }
         }
