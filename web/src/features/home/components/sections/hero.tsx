@@ -22,14 +22,13 @@ import {
   BookOpen,
   Code2,
   Gauge,
-  Headphones,
   KeyRound,
+  Ticket,
   ShieldCheck,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
-import { CustomerServiceQRCodes } from '@/components/customer-service-qr-codes'
 import { Button } from '@/components/ui/button'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
@@ -53,8 +52,8 @@ export function Hero(props: HeroProps) {
     window.location.hostname === 'localhost' ||
     window.location.hostname === '127.0.0.1'
   const apiOrigin = isLocalPreview
-    ? 'https://haoji.blog'
-    : serverAddress || 'https://haoji.blog'
+    ? 'https://haojiapi.me'
+    : serverAddress || 'https://haojiapi.me'
   const apiUrl = `${apiOrigin.replace(/\/$/, '')}/v1`
 
   const renderDocsButton = () => {
@@ -194,19 +193,14 @@ export function Hero(props: HeroProps) {
 
           <div className='mt-5 grid grid-cols-2 gap-2 border-t border-slate-200 pt-4 dark:border-white/10'>
             {renderDocsButton()}
-            <div className='group relative'>
-              <Button
-                variant='outline'
-                aria-haspopup='dialog'
-                className='border-border/50 hover:border-border hover:bg-muted/50 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-medium'
-              >
-                <Headphones className='text-muted-foreground/80 group-hover:text-foreground size-4 transition-colors duration-200' />
-                <span>{t('Contact support')}</span>
-              </Button>
-              <div className='pointer-events-none invisible absolute right-0 bottom-full z-20 mb-3 w-[min(90vw,28rem)] translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 opacity-0 shadow-xl transition-all duration-200 group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 dark:border-white/10 dark:bg-slate-900'>
-                <CustomerServiceQRCodes compact />
-              </div>
-            </div>
+            <Button
+              variant='outline'
+              className='group border-border/50 hover:border-border hover:bg-muted/50 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-medium'
+              render={<Link to='/support' />}
+            >
+              <Ticket className='text-muted-foreground/80 group-hover:text-foreground size-4 transition-colors duration-200' />
+              <span>{t('Support')}</span>
+            </Button>
           </div>
         </div>
       </div>

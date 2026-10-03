@@ -22,6 +22,7 @@ import {
   CreditCard,
   FileText,
   FlaskConical,
+  Gift,
   Key,
   LayoutDashboard,
   ListTodo,
@@ -155,7 +156,7 @@ export function useSidebarData(): SidebarData {
           {
             title: t('Redemption Codes'),
             url: '/redemption-codes',
-            icon: Ticket,
+            icon: Gift,
           },
           {
             title: t('Subscriptions'),
