@@ -54,6 +54,19 @@ export async function searchRedemptions(
   return res.data
 }
 
+export async function getRedemptionCategories(): Promise<ApiResponse<string[]>> {
+  const res = await api.get('/api/redemption/categories')
+  return res.data
+}
+
+export async function exportRedemptions(name: string): Promise<Blob> {
+  const res = await api.get('/api/redemption/export', {
+    params: { name },
+    responseType: 'blob',
+  })
+  return res.data
+}
+
 // Get single redemption code by ID
 export async function getRedemption(
   id: number

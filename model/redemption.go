@@ -124,6 +124,24 @@ func SearchRedemptions(keyword string, status string, startIdx int, num int) (re
 	return redemptions, total, nil
 }
 
+// GetRedemptionCategories returns the distinct batch names used to organize
+// redemption codes. Names are sorted for a stable admin export workflow.
+func GetRedemptionCategories() ([]string, error) {
+	var names []string
+	err := DB.Model(&Redemption{}).
+		Where("name <> ''").
+		Distinct("name").
+		Order("name asc").
+		Pluck("name", &names).Error
+	return names, err
+}
+
+func GetRedemptionsByName(name string) ([]*Redemption, error) {
+	var redemptions []*Redemption
+	err := DB.Where("name = ?", name).Order("id asc").Find(&redemptions).Error
+	return redemptions, err
+}
+
 func GetRedemptionById(id int) (*Redemption, error) {
 	if id == 0 {
 		return nil, errors.New("id 为空！")

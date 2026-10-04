@@ -16,15 +16,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { Download, Plus, Trash2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Button } from '@/components/ui/button'
 
-import { deleteInvalidRedemptions } from '../api'
+import {
+  deleteInvalidRedemptions,
+  exportRedemptions,
+  getRedemptionCategories,
+} from '../api'
 import { ERROR_MESSAGES } from '../constants'
 import { useRedemptions } from './redemptions-provider'
 
@@ -34,6 +38,34 @@ export function RedemptionsPrimaryButtons() {
   const [showDeleteInvalidConfirm, setShowDeleteInvalidConfirm] =
     useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [categories, setCategories] = useState<string[]>([])
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [isExporting, setIsExporting] = useState(false)
+
+  useEffect(() => {
+    void getRedemptionCategories().then((result) => {
+      if (result.success) setCategories(result.data ?? [])
+    })
+  }, [])
+
+  const handleExport = async () => {
+    if (!selectedCategory) return
+    setIsExporting(true)
+    try {
+      const blob = await exportRedemptions(selectedCategory)
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${selectedCategory}-兑换码.csv`
+      link.click()
+      URL.revokeObjectURL(url)
+      toast.success(t('Export completed'))
+    } catch {
+      toast.error(t('Failed to export redemption codes'))
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   const handleDeleteInvalid = async () => {
     setIsDeleting(true)
@@ -59,6 +91,28 @@ export function RedemptionsPrimaryButtons() {
   return (
     <>
       <div className='flex flex-wrap gap-2'>
+        <select
+          value={selectedCategory}
+          onChange={(event) => setSelectedCategory(event.target.value)}
+          className='border-input bg-background h-8 rounded-lg border px-2 text-sm'
+          aria-label={t('Redemption category')}
+        >
+          <option value=''>{t('Select category')}</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+        <Button
+          size='sm'
+          variant='outline'
+          disabled={!selectedCategory || isExporting}
+          onClick={() => void handleExport()}
+        >
+          <Download className='h-4 w-4' />
+          {t('Export category')}
+        </Button>
         <Button
           size='sm'
           variant='outline'
